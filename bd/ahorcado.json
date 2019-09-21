@@ -1,8 +1,7 @@
 {
-    "category": [ 
-        {
-            "id": "ciudades",
-            "words":[ 
+    "category": { 
+        "ciudades": {
+            "words":[
                 {
                     "id": "Madrid",
                     "split": ["M","a","d","r","i","d" ],
@@ -22,8 +21,7 @@
                 }
             ]
         },
-        {
-            "id": "animales",
+        "animales":{
             "words":[ 
                 {
                     "id": "perro",
@@ -45,5 +43,5 @@
                 }
             ]
         }
-    ]
+    }
 }
