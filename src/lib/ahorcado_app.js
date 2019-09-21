@@ -1,6 +1,11 @@
 'use strict';
 
 const NULL = '-';
+const level_map = {
+        "facil": 0,
+        "medio": 1,
+        "dificil": 2,
+};
 var pry = require('pryjs');
 
 function Happ (opts) {
@@ -40,6 +45,12 @@ Happ.prototype.solve = function (word, state, letter) {
     });
 
     return response(state, count);
+};
+
+Happ.prototype.parse_level = function (level) {
+
+    return level_map[level];
+
 };
 
 
