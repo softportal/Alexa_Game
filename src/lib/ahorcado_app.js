@@ -109,4 +109,3 @@ function response_error(error_msg) {
 module.exports = {
     App: Happ
 };
-

@@ -3,6 +3,10 @@
 // session persistence, api calls, and more.
 const Alexa = require('ask-sdk-core');
 const moment = require('moment-timezone'); // will help us do all the birthday math
+const esDicc = require('dictionaries-in-array')('es');
+const random = require('math-random');
+const silabs = require('silabify');
+const arrPref = require('array-prefix');
 
 var persistenceAdapter = getPersistenceAdapter();
 
@@ -106,7 +110,27 @@ const StartAhorcadoIntentHandler = {
             
     }
 };
-
+const StartPalabrasEncadenadasIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'StartPalabrasEncadenadasIntent';
+    },
+    handle(handlerInput) {
+        const {attributesManager, requestEnvelope} = handlerInput;
+        const sessionAttributes = attributesManager.getSessionAttributes();
+        sessionAttributes['game'] = "Palabras Encadenadas";
+        
+        const speakOutput = 'Comenzamos mi palabra es: ';
+        const firstWord = esDicc[parseInt(random()*(esDicc.length-1))];
+        sessionAttributes['lastAlexaWord'] = firstWord
+        sessionAttributes['saidWordsList'] = {}
+        sessionAttributes['saidWordsList'][firstWord] = true
+        return handlerInput.responseBuilder
+            .speak(speakOutput + firstWord + ". Ahora comienza tus respuestas diciendo " + "'" + "Respuesta" + "'" + "y tu palabra encadenada." )
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
 const PlayIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -166,7 +190,50 @@ const PlayIntentHandler = {
               .getResponse();
             
         } else if( game === "Palabras Encadenadas") {
+            console.log("Ha entrado en palabras Encadenadas")
             
+            const word = intent.slots.palabra.value;
+            const exist = arrPref(word, esDicc)[0];
+            if (!(word in sessionAttributes['saidWordsList']))
+            {
+                console.log("No se ha dicho la palabra")
+                if (exist === word)
+                {
+                    console.log("existe la palabra")
+                     if (silabs(sessionAttributes['lastAlexaWord'])[silabs(sessionAttributes['lastAlexaWord']).length-1] === silabs(word)[0])
+                    {
+                        console.log("coinciden las silabas")
+                        const ultSilabaUsuario = silabs(word)[silabs(word).length-1];
+                        const candidatesWords = arrPref(ultSilabaUsuario, esDicc);
+                        let encontrado = false, i = 5;
+                        while (!encontrado && i < candidatesWords.length)
+                        {
+                            if (silabs(candidatesWords[i])[0] === ultSilabaUsuario && (!(candidatesWords[i] in sessionAttributes['saidWordsList'])))
+                                encontrado = true;
+                            else
+                                i++;
+                        }
+            
+                        let newWord
+                        if (encontrado)
+                        {
+                            newWord = candidatesWords[i];
+                            const speakOutputPart1 = "Has dicho: ";
+                            const speakOutputPart2 = ". Yo digo: "; 
+                            speechText = speakOutputPart1 + word + speakOutputPart2 + newWord
+                        }
+                        else
+                            speechText = " Has ganado! No encuentro una palabra encadenada a la que has dicho."
+                        sessionAttributes['lastAlexaWord'] = newWord
+                        sessionAttributes['saidWordsList'][newWord] = true
+                        sessionAttributes['lastUserWord'] = word
+                        sessionAttributes['saidWordsList'][word] = true
+                    } else
+                    speechText = "Has perdido! Tu palabra no es encadenada con la anterior.";
+                } else
+                speechText = "Has perdido! Tu palabra no existe en mi diccionario.";
+            }else
+             speechText = "Has perdido! Esa palabra ya la habíamos dicho!";
         } else {
             speechText = requestAttributes.t('MISSING_MSG');
         }
@@ -218,9 +285,12 @@ const ResolveIntentHandler = {
 
         const game = sessionAttributes['game'];
         
+        console.log("Vas a resolver la palabra")
+        console.log(game)
         let speechText;
         if(game === "Ahorcado"){
             let palabra = intent.slots.palabraAhorcado.value;
+            console.log(palabra)
             let word = sessionAttributes['word']['id']
             if ( word === palabra ){
                 speechText = "Enhorabuena! Has acertado!"
@@ -250,10 +320,11 @@ const HelpIntentHandler = {
             && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-        const {attributesManager} = handlerInput;
+        const {attributesManager, requestEnvelope} = handlerInput;
         const requestAttributes = attributesManager.getRequestAttributes();
         const speechText = requestAttributes.t('HELP_MSG');
-
+        const sessionAttributes = attributesManager.getSessionAttributes();
+        
         return handlerInput.responseBuilder
             .speak(speechText)
             .reprompt(speechText)
@@ -410,8 +481,10 @@ exports.handler = Alexa.SkillBuilders.custom()
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
         StartAhorcadoIntentHandler,
+        StartPalabrasEncadenadasIntentHandler,
         PlayIntentHandler,
         ResolveIntentHandler,
+        HintIntentHandler,
         IntentReflectorHandler) // make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
         .addRequestInterceptors(
             LocalizationRequestInterceptor,

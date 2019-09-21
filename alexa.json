@@ -1,0 +1,380 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "juegos reunidos",
+            "intents": [
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "StartAhorcadoIntent",
+                    "slots": [
+                        {
+                            "name": "level",
+                            "type": "nivelAhorcado",
+                            "samples": [
+                                "nivel {level}"
+                            ]
+                        },
+                        {
+                            "name": "category",
+                            "type": "categories",
+                            "samples": [
+                                "quiero {category}",
+                                "{category}",
+                                "escojo {category}"
+                            ]
+                        }
+                    ],
+                    "samples": [
+                        "ahorcado",
+                        "jugar al ahorcado",
+                        "quiero jugar al ahorcado"
+                    ]
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "HintIntent",
+                    "slots": [],
+                    "samples": [
+                        "pista",
+                        "pista por favor",
+                        "una pista por favor",
+                        "Quiero una pista por favor"
+                    ]
+                },
+                {
+                    "name": "PlayIntent",
+                    "slots": [
+                        {
+                            "name": "letra",
+                            "type": "letters"
+                        },
+                        {
+                            "name": "palabra",
+                            "type": "AMAZON.SearchQuery"
+                        }
+                    ],
+                    "samples": [
+                        "Respuesta {palabra}",
+                        "Mi respuesta es {palabra}",
+                        "La mía es {palabra}",
+                        "la {letra}"
+                    ]
+                },
+                {
+                    "name": "ResolveIntent",
+                    "slots": [
+                        {
+                            "name": "palabraAhorcado",
+                            "type": "AMAZON.SearchQuery"
+                        }
+                    ],
+                    "samples": [
+                        "la palabra es {palabraAhorcado}",
+                        "resolver {palabraAhorcado}"
+                    ]
+                },
+                {
+                    "name": "StartPalabrasEncadenadasIntent",
+                    "slots": [],
+                    "samples": [
+                        "palabras encadenadas",
+                        "empezar palabras encadenadas",
+                        "jugar a palabras encadenadas",
+                        "jugar palabras encadenadas"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "categories",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "animales"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "famosos"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "monumentos"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "games",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "palabras encadenadas"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "ahorcado"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "nivelAhorcado",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "dificil"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "medio"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "facil"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "letters",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "z"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "y"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "x"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "w"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "v"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "u"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "t"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "s"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "r"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "q"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "p"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "o"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "ñ"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "n"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "m"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "l"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "k"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "j"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "i"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "h"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "g"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "f"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "e"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "d"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "c"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "b"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "a"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        "dialog": {
+            "intents": [
+                {
+                    "name": "StartAhorcadoIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "level",
+                            "type": "nivelAhorcado",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.983068964167.1350276049122"
+                            }
+                        },
+                        {
+                            "name": "category",
+                            "type": "categories",
+                            "confirmationRequired": false,
+                            "elicitationRequired": true,
+                            "prompts": {
+                                "elicitation": "Elicit.Slot.983068964167.1058431903407"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "PlayIntent",
+                    "confirmationRequired": false,
+                    "prompts": {},
+                    "slots": [
+                        {
+                            "name": "letra",
+                            "type": "letters",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        },
+                        {
+                            "name": "palabra",
+                            "type": "AMAZON.SearchQuery",
+                            "confirmationRequired": false,
+                            "elicitationRequired": false,
+                            "prompts": {}
+                        }
+                    ]
+                }
+            ],
+            "delegationStrategy": "ALWAYS"
+        },
+        "prompts": [
+            {
+                "id": "Elicit.Slot.983068964167.1350276049122",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Que nivel de dificultad quieres facil, medio o dificil?"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.983068964167.1058431903407",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Necesito que me digas una categoría, las categorias disponibles son, animales, monumentos y famosos"
+                    }
+                ]
+            },
+            {
+                "id": "Elicit.Slot.1365804505101.1204743143369",
+                "variations": [
+                    {
+                        "type": "PlainText",
+                        "value": "Estoy esperando tu palabra"
+                    }
+                ]
+            }
+        ]
+    }
+}

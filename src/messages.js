@@ -1,17 +1,13 @@
 module.exports = {
     es: {
         translation: {
-            WELCOME_MSG: 'Bienvenido! Escoge una categoría. Las disponibles son, monumentos, famosos o animales ',
-            REGISTER_MSG: 'Se ha registrado la categoría %s. ',
-            SAY_MSG: 'Quedan %s días para que cumplas %s años. ',
-            GREET_MSG: 'Feliz cumpleaños! Hoy cumples %s! ',
-            MISSING_MSG: 'Parece que aun no me has dicho tu fecha de cumpleaños. Prueba decir, registra mi cumpleaños. ',
-            OVERWRITE_MSG: 'Si quieres cambiar la fecha solo di, registra mi cumpleaños',
-            HELP_MSG: 'Puedes preguntarme, cuanto falta para mi cumpleaños? . O registar la fecha diciendo, registra mi cumpleaños. ',
-            GOODBYE_MSG: 'Hasta luego! ',
+            WELCOME_MSG: 'Bienvenido! Escoge un juego, puedes escoger entre el Ahorcado o Palabras encadenadas.',
+            MISSING_GAME_MSG: ' No has definido un juego al que jugar.',
+            RESPONSE_AHORCADO_LETTER_MSG: 'Has encontrado %s letras. Te quedan %s vidas. Te he enviado una tarjeta con la información. Escoge otra letra o resuelve',
+            RESPONSE_CARD_LITTLE: 'VIDAS => %s',
             REFLECTOR_MSG: 'Acabas de activar %s ',
-            FALLBACK_MSG: 'Lo siento, no se nada sobre eso. Por favor inténtalo otra vez. ',
-            ERROR_MSG: 'Lo siento, ha habido un problema. Por favor inténtalo otra vez. '
+            RESPONSE_NUM_LETTERS_WORD: 'Palabra de %s letras. Escoge una letra o resuelve la palabra',
+            LOST_MSG: 'Oh! has perdido.'
         }
     }
 }
