@@ -72,4 +72,6 @@ function response_error(error_msg) {
 //
 //p.test();
 
-module.exports = Happ
+module.exports = {
+    App: Happ
+};
