@@ -4,9 +4,8 @@ const NULL = '-';
 const level_map = {
         "facil": 0,
         "medio": 1,
-        "dificil": 2,
+        "dificil": 2
 };
-var pry = require('pryjs');
 
 function Happ (opts) {
     this.data = require('../../bd/ahorcado.json');

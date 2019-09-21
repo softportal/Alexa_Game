@@ -2,18 +2,20 @@
 // Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
 // session persistence, api calls, and more.
 const Alexa = require('ask-sdk-core');
-var persistenceAdapter = getPersistenceAdapter();
-
 const moment = require('moment-timezone'); // will help us do all the birthday math
+
+var persistenceAdapter = getPersistenceAdapter();
 
 // i18n dependencies. i18n is the main module, sprintf allows us to include variables with '%s'.
 const i18n = require('i18next');
 const sprintf = require('i18next-sprintf-postprocessor');
+const Happ = require('./lib/ahorcado_app');
+
 
 // We import language strings object containing all of our strings. 
 // The keys for each string will then be referenced in our code
 // e.g. requestAttributes.t('WELCOME_MSG')
-const languageStrings = require('./localisation');
+const languageStrings = require('./messages');
 
 function getPersistenceAdapter() {
     // This function is an indirect way to detect if this is part of an Alexa-Hosted skill
@@ -36,6 +38,7 @@ function getPersistenceAdapter() {
     }
 }
 
+
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
@@ -43,15 +46,9 @@ const LaunchRequestHandler = {
     handle(handlerInput) {
         const {attributesManager} = handlerInput;
         const requestAttributes = attributesManager.getRequestAttributes();
-        const sessionAttributes = attributesManager.getSessionAttributes();
-        
-        const category = sessionAttributes['category'];
         
         let speechText = requestAttributes.t('WELCOME_MSG');
-
-        if(category){
-            speechText = requestAttributes.t('REGISTER_MSG', category)
-        }
+        
         
         return handlerInput.responseBuilder
             .speak(speechText)
@@ -60,64 +57,85 @@ const LaunchRequestHandler = {
     }
 };
 
-const RegisterCategoryIntentHandler = {
+const StartAhorcadoIntentHandler = {
     canHandle(handlerInput) {
         return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'RegisterBirthdayIntent';
-    },
-    handle(handlerInput) {
-        const {attributesManager} = handlerInput;
-        const requestAttributes = attributesManager.getRequestAttributes();
-        const sessionAttributes = attributesManager.getSessionAttributes();
-        const {intent} = handlerInput.requestEnvelope.request;
-
-        const day = intent.slots.day.value;
-        const month = intent.slots.month.resolutions.resolutionsPerAuthority[0].values[0].value.id;
-        const monthName = intent.slots.month.resolutions.resolutionsPerAuthority[0].values[0].value.name;
-        const year = intent.slots.year.value;
-        
-        sessionAttributes['day'] = day;
-        sessionAttributes['month'] = month;
-        sessionAttributes['monthName'] = monthName;
-        sessionAttributes['year'] = year;
-
-        return handlerInput.responseBuilder
-            .speak(requestAttributes.t('REGISTER_MSG', day, monthName, year) + requestAttributes.t('HELP_MSG'))
-            .reprompt(requestAttributes.t('HELP_MSG'))
-            .getResponse();
-    }
-};
-
-const SayBirthdayIntentHandler = {
-    canHandle(handlerInput) {
-        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'SayBirthdayIntent';
+            && handlerInput.requestEnvelope.request.intent.name === 'StartAhorcadoIntent';
     },
     async handle(handlerInput) {
         const {attributesManager} = handlerInput;
         const requestAttributes = attributesManager.getRequestAttributes();
         const sessionAttributes = attributesManager.getSessionAttributes();
+        const {intent} = handlerInput.requestEnvelope.request;
 
-        const day = sessionAttributes['day'];
-        const month = sessionAttributes['month'];
-        const year = sessionAttributes['year'];
+        sessionAttributes['game'] = "Ahorcado";
+        const happ_client = Happ.App();
         
         let speechText;
-        if(day && month && year){    
-            const timezone = 'Europe/Madrid'; // we'll change this later to retrieve the timezone from the device
-            const today = moment().tz(timezone).startOf('day');
-            const wasBorn = moment(`${month}/${day}/${year}`, "MM/DD/YYYY").tz(timezone).startOf('day');
-            const nextBirthday = moment(`${month}/${day}/${today.year()}`, "MM/DD/YYYY").tz(timezone).startOf('day');
-            if(today.isAfter(nextBirthday)){
-                nextBirthday.add('years', 1);
+        let speechTextCardTitle;
+        let speechTextCardText;
+
+        let category = intent.slots.category.value;
+        let level = happ_client.parse_level(level);
+        
+        let word = happ_client.search_by_category_level(category,level);
+        
+        sessionAttributes['word'] = word;
+        
+        return handlerInput.responseBuilder
+              .speak(speechText)
+              .reprompt(speechText)
+              .withSimpleCard(
+                speechTextCardTitle, 
+                speechTextCardText)
+              .getResponse();
+        
+            
+    }
+};
+
+const PlayIntentHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'PlayIntent';
+    },
+    async handle(handlerInput) {
+        const {attributesManager} = handlerInput;
+        const requestAttributes = attributesManager.getRequestAttributes();
+        const sessionAttributes = attributesManager.getSessionAttributes();
+        const {intent} = handlerInput.requestEnvelope.request;
+
+        const game = sessionAttributes['game'];
+        
+        let speechText;
+        if(game === "Ahorcado"){
+            let letter = intent.slots.letters.value;
+            let match_letters = 0, lives = sessionAttributes['lives'];
+            let speechTextCardTitle, speechTextCardText;
+            if (match_letters === 0){
+                lives -= 1;
+                sessionAttributes['lives'] = lives;
             }
-            const age = today.diff(wasBorn, 'years');
-            const daysLeft = nextBirthday.startOf('day').diff(today, 'days'); // same days returns 0
-            speechText = requestAttributes.t('SAY_MSG', daysLeft, age + 1);
-            if(daysLeft === 0) {
-                speechText = requestAttributes.t('GREET_MSG', age);
+            if (lives <= 0){
+                speechText = requestAttributes.t('LOST_MSG');
+                speechTextCardTitle = speechText
+                speechTextCardText = "";
             }
-            speechText += requestAttributes.t('OVERWRITE_MSG');
+            else {
+                speechText = requestAttributes.t('RESPONSE_AHORCADO_LETTER_MSG', match_letters, lives);
+                speechTextCardTitle = requestAttributes.t('RESPONSE_CARD_LITTLE', lives);
+                speechTextCardText = "";
+            }
+            return handlerInput.responseBuilder
+              .speak(speechText)
+              .reprompt(speechText)
+              .withSimpleCard(
+                speechTextCardTitle, 
+                speechTextCardText)
+              .getResponse();
+            
+        } else if( game === "Palabras Encadenadas") {
+            
         } else {
             speechText = requestAttributes.t('MISSING_MSG');
         }
@@ -128,6 +146,35 @@ const SayBirthdayIntentHandler = {
             .getResponse();
     }
 };
+
+const HintIntentHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'PlayIntent';
+    },
+    async handle(handlerInput) {
+        const {attributesManager} = handlerInput;
+        const requestAttributes = attributesManager.getRequestAttributes();
+        const sessionAttributes = attributesManager.getSessionAttributes();
+        const {intent} = handlerInput.requestEnvelope.request;
+
+        const game = sessionAttributes['game'];
+        
+        let speechText;
+        if(game === "Ahorcado"){
+            
+            
+        } else {
+            speechText = requestAttributes.t('MISSING_MSG');
+        }
+        
+        return handlerInput.responseBuilder
+            .speak(speechText)
+            .reprompt(speechText)
+            .getResponse();
+    }
+};
+
 
 const HelpIntentHandler = {
     canHandle(handlerInput) {
@@ -291,11 +338,11 @@ const SaveAttributesResponseInterceptor = {
 exports.handler = Alexa.SkillBuilders.custom()
     .addRequestHandlers(
         LaunchRequestHandler,
-        RegisterBirthdayIntentHandler,
-        SayBirthdayIntentHandler,
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
+        StartAhorcadoIntentHandler,
+        PlayIntentHandler,
         IntentReflectorHandler) // make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
         .addRequestInterceptors(
             LocalizationRequestInterceptor,
@@ -306,3 +353,4 @@ exports.handler = Alexa.SkillBuilders.custom()
             SaveAttributesResponseInterceptor)
         .withPersistenceAdapter(persistenceAdapter)
         .lambda();
+
