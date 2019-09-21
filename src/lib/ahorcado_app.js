@@ -68,8 +68,8 @@ function response_error(error_msg) {
     };
 }
 
-var p = new Happ({});
-
-p.test();
+//var p = new Happ({});
+//
+//p.test();
 
 module.exports = Happ
