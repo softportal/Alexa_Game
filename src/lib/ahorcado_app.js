@@ -8,11 +8,11 @@ const level_map = {
 };
 
 function Happ (opts) {
-    this.data = require('../../bd/ahorcado.json');
+    this.data = require('bd/ahorcado.json');
 }
 
 //use only testing purposes
-Happ.prototype.test = function () {
+Happ.prototype.test = function() {
     var word = this.search_by_category_level("ciudades", 0);
 
     console.log(word);
@@ -26,7 +26,17 @@ Happ.prototype.search_by_category_level = function (category, level) {
     return this.data["category"][category]["words"][level];
 };
 
-Happ.prototype.solve = function (word, state, letter) {
+Happ.prototype.new_state = function(word){
+    var n     = word['split'].length
+    var state = new Array(n);
+    state.fill(NULL);
+    return {
+        "render": render(state),
+        "state": state
+    };
+};
+
+Happ.prototype.solve = function(word, state, letter) {
     var count = 0;
     var split = word["split"]
     if (state.length != split.length){
@@ -46,10 +56,23 @@ Happ.prototype.solve = function (word, state, letter) {
     return response(state, count);
 };
 
-Happ.prototype.parse_level = function (level) {
+Happ.prototype.validate = function(state){
+    var res = true;
+    state.forEach(function (v, i) {
+        if (v == NULL){
+            res = false;
+        }
+    });
+    
+    return res;
+}
 
+Happ.prototype.prueba = function(){
+    console.log("prueba");
+}
+
+Happ.prototype.parse_level = function(level) {
     return level_map[level];
-
 };
 
 
@@ -60,13 +83,14 @@ function private_test(chain) {
     console.log(chain);
 }
 
+function render(state){
+    return state.join('  ');
+}
+
 function response(state, count){
-    var render = function(){
-        return state.join('  ');
-    }
 
     return {
-        "render": render(),
+        "render": render(state),
         "state": state,
         "count": count
     };
@@ -85,3 +109,4 @@ function response_error(error_msg) {
 module.exports = {
     App: Happ
 };
+

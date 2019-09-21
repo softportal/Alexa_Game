@@ -52,6 +52,9 @@ const LaunchRequestHandler = {
         
         return handlerInput.responseBuilder
             .speak(speechText)
+            .withSimpleCard(
+                "Titulo de prueba", 
+                "texto de prueba")
             .reprompt(speechText)
             .getResponse();
     }
@@ -69,25 +72,35 @@ const StartAhorcadoIntentHandler = {
         const {intent} = handlerInput.requestEnvelope.request;
 
         sessionAttributes['game'] = "Ahorcado";
-        const happ_client = Happ.App();
+        const happ_client = new Happ.App();
         
         let speechText;
         let speechTextCardTitle;
         let speechTextCardText;
 
         let category = intent.slots.category.value;
-        let level = happ_client.parse_level(level);
+        let level = happ_client.parse_level(intent.slots.level.value);
         
         let word = happ_client.search_by_category_level(category,level);
+        let state_word_obj = happ_client.new_state(word);
         
         sessionAttributes['word'] = word;
+        sessionAttributes['lives'] = word['split'].length;
+        sessionAttributes['state_word'] = state_word_obj['state'];
+        
+        speechText = requestAttributes.t('RESPONSE_NUM_LETTERS_WORD', word['split'].length);
+        speechTextCardTitle = requestAttributes.t('RESPONSE_CARD_LITTLE', word['split'].length);
+        speechTextCardText = state_word_obj['render']
+        
+        console.log(speechTextCardTitle);
+        console.log(speechTextCardText);
         
         return handlerInput.responseBuilder
               .speak(speechText)
-              .reprompt(speechText)
               .withSimpleCard(
                 speechTextCardTitle, 
                 speechTextCardText)
+              .reprompt(speechText)
               .getResponse();
         
             
@@ -109,8 +122,17 @@ const PlayIntentHandler = {
         
         let speechText;
         if(game === "Ahorcado"){
-            let letter = intent.slots.letters.value;
-            let match_letters = 0, lives = sessionAttributes['lives'];
+            let letter = intent.slots.letra.value;
+            const happ_client = new Happ.App();
+            
+            let word_obj = sessionAttributes['word'];
+            let state_word = sessionAttributes['state_word'];
+            
+            let solve_obj = happ_client.solve(word_obj, state_word, letter);
+            
+            sessionAttributes['state_word'] = solve_obj['state'];
+            
+            let match_letters = solve_obj['count'], lives = sessionAttributes['lives'];
             let speechTextCardTitle, speechTextCardText;
             if (match_letters === 0){
                 lives -= 1;
@@ -124,7 +146,16 @@ const PlayIntentHandler = {
             else {
                 speechText = requestAttributes.t('RESPONSE_AHORCADO_LETTER_MSG', match_letters, lives);
                 speechTextCardTitle = requestAttributes.t('RESPONSE_CARD_LITTLE', lives);
-                speechTextCardText = "";
+                speechTextCardText = solve_obj['render'];
+            }
+            
+            if (happ_client.validate(solve_obj['state'])) {
+                return handlerInput.responseBuilder
+                  .speak("Enhorabuena! Has ganado!")
+                  .withSimpleCard(
+                    "Has ganado!", 
+                    "")
+                  .getResponse();
             }
             return handlerInput.responseBuilder
               .speak(speechText)
@@ -162,7 +193,44 @@ const HintIntentHandler = {
         
         let speechText;
         if(game === "Ahorcado"){
-            
+            speechText = sessionAttributes['word']['pistas'][0]['pista']
+        } else {
+            speechText = requestAttributes.t('MISSING_MSG');
+        }
+        
+        return handlerInput.responseBuilder
+            .speak(speechText)
+            .reprompt(speechText)
+            .getResponse();
+    }
+};
+
+const ResolveIntentHandler = {
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'ResolveIntent';
+    },
+    async handle(handlerInput) {
+        const {attributesManager} = handlerInput;
+        const requestAttributes = attributesManager.getRequestAttributes();
+        const sessionAttributes = attributesManager.getSessionAttributes();
+        const {intent} = handlerInput.requestEnvelope.request;
+
+        const game = sessionAttributes['game'];
+        
+        let speechText;
+        if(game === "Ahorcado"){
+            let palabra = intent.slots.palabraAhorcado.value;
+            let word = sessionAttributes['word']['id']
+            if ( word === palabra ){
+                speechText = "Enhorabuena! Has acertado!"
+                return handlerInput.responseBuilder
+                    .speak(speechText)
+                    .getResponse();
+            } else {
+                sessionAttributes['lives'] = sessionAttributes['lives'] - 1;
+                speechText = "No has acertado, has perdido una vida."
+            }
             
         } else {
             speechText = requestAttributes.t('MISSING_MSG');
@@ -343,6 +411,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         SessionEndedRequestHandler,
         StartAhorcadoIntentHandler,
         PlayIntentHandler,
+        ResolveIntentHandler,
         IntentReflectorHandler) // make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
         .addRequestInterceptors(
             LocalizationRequestInterceptor,
