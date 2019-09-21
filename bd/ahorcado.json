@@ -1,0 +1,49 @@
+{
+    "category": [ 
+        {
+            "id": "ciudades",
+            "words":[ 
+                {
+                    "id": "Madrid",
+                    "split": ["M","a","d","r","i","d" ],
+                    "pistas":[
+                        { "nivel": 0,
+                          "pista": "madrid"
+                        }
+                    ]
+                },{
+                    "id": "Barcelona",
+                    "split": ["B","a","r","c","e","l", "o", "n", "a" ],
+                    "pistas":[
+                        { "nivel": 0,
+                          "pista": "bcn"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "animales",
+            "words":[ 
+                {
+                    "id": "perro",
+                    "split": ["p","e","r","r","o"],
+                    "pistas":[
+                        { "nivel": 0,
+                          "pista": "perro"
+                        }
+                    ]
+                },
+                {
+                    "id": "gato",
+                    "split": ["g","a","t","o"],
+                    "pistas":[
+                        { "nivel": 0,
+                          "pista": "gato"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
